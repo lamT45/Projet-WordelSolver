@@ -1,20 +1,28 @@
+# backend/app/routes/wordle.py
 from fastapi import APIRouter
-from backend.app.services import solve_csp
+from app.services.wordle_solver import HybridWordleSolver
 
 router = APIRouter()
 
-@router.get("/status")
-def status():
-    return {"message": "Wordle CSP Solver API is running"}
+# Charger dictionnaire FR + EN
+with open("backend/app/services/words_fr.txt", encoding="utf-8") as f:
+    words_fr = [w.strip().lower() for w in f.readlines() if len(w.strip())==5]
 
-@router.post("/solve")
-def solve_wordle(feedback: dict):
+with open("backend/app/services/words_en.txt", encoding="utf-8") as f:
+    words_en = [w.strip().lower() for w in f.readlines() if len(w.strip())==5]
+
+# Ici on peut choisir français ou anglais
+solver = HybridWordleSolver(word_list=words_fr + words_en)
+
+@router.post("/guess")
+def make_guess(feedback: dict):
     """
-    feedback: dict avec
-    {
-        "guess": "apple",
-        "result": ["green", "gray", "yellow", "gray", "gray"]
+    feedback = {
+        'green': {0:'a'},
+        'yellow': {1:['b']},
+        'grey': ['c','d']
     }
     """
-    words = solve_csp.filter_words(feedback)
-    return {"possible_words": words}
+    solver.update_constraints(feedback)
+    next_guess = solver.get_next_guess()
+    return {"next_guess": next_guess}
