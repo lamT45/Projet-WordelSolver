@@ -8,7 +8,7 @@ openai==1.51.0
 requests==2.32.3
 
 # Optionnel : si tu utilises OR-Tools pour un CSP avancé
-ortools==9.10.4067
+ortools==9.14.6206
 
 # Tests unitaires
 pytest==8.3.2
